@@ -1,6 +1,6 @@
 
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from allauth.socialaccount.providers.facebook.views import FacebookProvider
+from allauth.socialaccount.providers.facebook.provider import FacebookProvider
 from allauth.socialaccount.models import SocialApp
 from allauth.core.exceptions import ImmediateHttpResponse
 from django.contrib.auth import get_user_model
@@ -119,6 +119,7 @@ class TestSocialLoginSerializer(TestCase):
     def setUpTestData(cls):
         cls.request_data = {"access_token": "token1234"}
         cls.request = APIRequestFactory().post(cls.request_data, format='json')
+        cls.request.session = {}
         social_app = SocialApp.objects.create(
             provider='facebook',
             name='Facebook',
@@ -148,7 +149,7 @@ class TestSocialLoginSerializer(TestCase):
         serializer.is_valid()
         self.assertDictEqual(serializer.errors, self.NO_ADAPTER_CLASS_PRESENT)
 
-    @patch('allauth.socialaccount.providers.facebook.views.fb_complete_login')
+    @patch('allauth.socialaccount.providers.facebook.flows.complete_login')
     @patch('allauth.socialaccount.adapter.DefaultSocialAccountAdapter.pre_social_login')
     def test_immediate_http_response_error(self, mock_pre_social_login, mock_fb_complete_login):
         dummy_view = SocialLoginView()
